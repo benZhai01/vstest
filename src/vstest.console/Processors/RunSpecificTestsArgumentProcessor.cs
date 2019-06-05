@@ -8,6 +8,7 @@ namespace Microsoft.VisualStudio.TestPlatform.CommandLine.Processors
     using System.Collections.ObjectModel;
     using System.Diagnostics.Contracts;
     using System.Globalization;
+    using System.IO;
     using System.Linq;
 
     using Microsoft.VisualStudio.TestPlatform.Client.RequestHelper;
@@ -173,6 +174,14 @@ namespace Microsoft.VisualStudio.TestPlatform.CommandLine.Processors
         {
             if (!string.IsNullOrWhiteSpace(argument))
             {
+                // cmd/ps has the max string input length limitation
+                // make the argument can accept a txt file that records the specific case names. 
+                if (argument.EndsWith(".txt"))
+                {
+                    var filePath = argument;
+                    argument = File.ReadAllText(filePath);
+                    this.output.WriteLine($"Read specified cases from {filePath} successfully", OutputLevel.Information);
+                }
                 this.selectedTestNames = new Collection<string>(
                     argument.Tokenize(SplitDelimiter, EscapeDelimiter)
                         .Where(x => !string.IsNullOrWhiteSpace(x))
